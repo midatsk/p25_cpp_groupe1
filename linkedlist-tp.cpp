@@ -1,136 +1,108 @@
 #include <iostream>
 
-// Nous voulons implémenter un type de donné qui a la structure de liste chaînée
-// et qui stocke, par exemple, des entiers.
-
-// Une liste est composée de cellules reliées entre elles.
-
-// Dans une liste simplement chaînée:
-//   - chaque cellule pointe vers sa cellule suivante
-//   - la dernière cellule n'a pas de cellule suivante
-
-// Par exemple, la liste chaînée suivante contient les entiers 42, 12 et 45.
-// 42 -> 12 -> 45 -> null
-
-// Une cellule contient donc deux choses: une valeur et un pointeur vers sa cellule suivante
-//   qui est l'adresse mémoire de la cellule suivante.
-
-// Une liste pointe vers sa première cellule (la tête de liste) ou vers null si la liste est vide.
-
-// Donc vous avez besoin de deux structures...
-
-// La liste est une structure de données qui a beaucoup de défauts
-// mais qui est un cas d'école sympa à implémenter en c++ et sans IA générative bien sûr -
-
-// Il existe d'autres types de listes chaînées.
-// La liste doublement chaînées où:
-//    - chaque cellule pointe vers sa cellule précédente et vers sa cellule suivante
-//    - la première (resp. dernière) cellule n'a pas de cellule précédente (resp. suivante)
-
-// La liste circulaire où:
-//    - chaque cellule pointe vers sa cellule suivante
-//    - la dernière cellule pointe vers la première cellule
-
-// Ces deux dernières listes sont plus complexes à implémenter, implémentez une liste simplement chaînée
-// avec les opérations de base:
-//   - ajouter un élément en tête de liste  (push_front - une opération en temps constant O(1))
-//   - chercher un élément dans la liste    (find -       une opération en temps linéaire O(n))
-//   - supprimer un élément dans la liste   (remove -     une opération en temps linéaire O(n))
-//   - afficher la liste                    (print -      une opération en temps linéaire O(n))
-//   - vérifier si la liste est vide        (is_empty -   une opération en temps constant O(1))
-// Non, nous ne voulons pas ajouter un élément en fin de liste:
-//   - parce que nous ne voulons pas faire une opération d'ajout qui soit en temps linéaire O(n) - horrible !
-// Et si on voulait une liste où on peut ajouter en tête et en fin de liste ?
-//    On ferait une liste doublement chaînée avec un pointeur vers la première cellule et un vers la dernière cellule.
-
-// Surtout dessinez la structure sur papier avant de coder
-// et dessinez pas à pas des exemples d'ajout, de recherche, de suppression
-
-// Oui il y aura un new (quelque part) et vous n'oublierez pas de libérer la mémoire
-// (i.e. libérer les cellules quand elles ne sont plus utilisées)
-
-// Voici un exemple de main qui doit fonctionner avec votre liste chaînée:
-
 struct Cell
 {
+    int donnee;
+    Cell *next;
 
-  int donnee; // un entier que l'on stocke dans la cellule
-
-  Cell *suivant; // un pointeur vers une autre cellule
+    Cell(int donnee) : donnee(donnee), next(nullptr) {}
 };
-
-// Autre possibilité : faire de head une variable globale ?
 
 struct LinkedList
 {
+    Cell *head;
 
-  Cell *head;
-  LinkedList() : head(nullptr) {}
+    LinkedList() : head(nullptr) {}
 
-  void push_front(int val)
-  {
-    Cell *n = new Cell();
-
-    n->donnee = val;
-    n->suivant = head;
-
-    head = n;
-  }
-
-  Cell *find(int valeur)
-  {
-
-    Cell *elem = head;
-    while (elem != nullptr && elem->donnee != valeur)
+    ~LinkedList()
     {
-      elem = elem->suivant;
-    }
-    return elem;
-  }
-
-  void remove(int valeur) // on va supposer que l'utilisateur veut supprimer un élément qui est bien présent dans la liste, on mettar les exceptions après
-  {
-    Cell *next = head;
-    Cell *pvaleur = find(valeur); //
-
-    if (pvaleur == head)
-    {
-      head->suivant = head;
-      delete pvaleur;
-      return;
+        // Parcours des cellules que l'on supprime au fur et à mesure
+        while (head != nullptr)
+        {
+            Cell *temp = head;
+            head = head->next; // On désigne la nouvelle tête de liste
+            delete temp; // On supprime la cellule qui était head précédemment
+        }
     }
 
-    // on veut trouver l'élément précédent pvaleur pour le faire pointer au bon endroit
-
-    while (next != nullptr && next->suivant != pvaleur)
+    void push_front(int val)
     {
-      next = next->suivant;
+        Cell *new_cell = new Cell(val);
+        new_cell->next = head;
+        head = new_cell;
     }
 
-    if (next == nullptr)
-      return;
-    next->suivant = pvaleur->suivant;
-    delete pvaleur;
-  }
-
-  void print()
-  {
-
-    Cell *elem = head;
-    while (elem != nullptr)
+    bool find(int valeur)
     {
-      std::cout<<elem->donnee<<", "<<std::endl;
-      elem = elem->suivant;
-
+        Cell *elem = head;
+        while (elem != nullptr && elem->donnee != valeur)
+        {
+            elem = elem->next;
+        }
+        return elem != nullptr; 
     }
-  }
 
-  bool is_empty()
-  {
-    
+    Cell *find_elem(int valeur)
+    {
+        Cell *elem = head;
+        while (elem != nullptr && elem->donnee != valeur)
+        {
+            elem = elem->next;
+        }
+        return elem;
+    }
 
-  }
+    void remove(int valeur)
+    {
+        // Disjonction de cas
+
+        // Si la liste est vide
+        if (head == nullptr)
+            return;
+
+        // Si l'élément à supprimer est le premier de la liste
+        if (head->donnee == valeur)
+        {
+            Cell *temp = head;
+            head = head->next; // On désigne la nouvelle tête
+            delete temp; // Suppression de la cellule dans le tas
+            return;
+        }
+
+        // Si l'élément à supprimer est au milieu de la liste, il faut accéder au pointeur de l'élément le précédant
+        Cell *prev = head;
+        // Parcours de liste jusqu'à trouver la cellule précédente
+        while (prev->next != nullptr && prev->next->donnee != valeur)
+        {
+            prev = prev->next;
+        }
+
+        if (find(valeur)==false)
+            return;
+
+        Cell *to_del = prev->next; // On récupère le pointeur de l'élément à supprimer
+        prev->next = to_del->next; 
+        delete to_del;
+    }
+
+    void print()
+    {
+        Cell *elem = head;
+        while (elem != nullptr)
+        {
+            std::cout << elem->donnee << " ";
+            elem = elem->next;
+        }
+        std::cout << std::endl;
+    }
+
+    bool is_empty()
+    {
+        return head == nullptr;
+    }
 };
+
+
 
 int main()
 {
