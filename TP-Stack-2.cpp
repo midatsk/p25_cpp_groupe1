@@ -1,18 +1,20 @@
 #include <iostream>
 
-//Je travaille sans exceptions pour l'instant
+
 
 struct IntStack
 {
 
 int size; //taille de la pile
-int nb; //nombre d'éléments dans le tableau. Est-ce qu'il y a besoin d'utiliser une référence dans ce cas-là ? 
-int* tab;  //pointeur vers le tableau 
+int nb; //nombre d'éléments dans le tableau.  
+int* tab;  //pointeur vers le tableau créé dans le heap
+
 
 IntStack(int size) : size(size), nb(0)
 {
     tab = new int [size];
 }
+
 
 IntStack(const IntStack &src) : size(src.size), nb(src.nb) 
 {
@@ -51,10 +53,12 @@ IntStack& operator=(const IntStack& src)
 
 void print()
 {
-    for (int i=0; i<size; i++)
+    std::cout << "[ ";
+    for (int i = 0; i < nb; i++)
     {
-        std::cout << tab[i] <<" "<< std::endl;
+        std::cout << tab[i] << " ";
     }
+    std::cout << "]" << std::endl;
 }
 
 bool is_empty()
@@ -69,39 +73,40 @@ bool is_full()
 
 void push(int e)
 {
-    if (is_full() == false) 
+    if (is_full())
     {
-        tab[nb] = e;
-        nb++ ; 
+        throw std::runtime_error("Pile pleine");
     }
+
+    tab[nb] = e;
+    nb++;
 }
 
 int top()
 {
-    if (is_empty() == false)
+    if (is_empty())
     {
-        return tab[nb];
+        throw std::runtime_error("Pile vide");
     }
+
+    return tab[nb - 1];
 }
 
 int pop()
 {
-    if (is_empty()==false)
+    if (is_empty())
     {
-        return tab[nb];
+        throw std::runtime_error("Pile vide");
     }
-    int* tab_aux = new int [size];
-
-    for (int i = 0; i<nb-1;i++)
-    {
-        tab_aux[i]=tab[i];
-        tab = tab_aux;
-    }
-    nb = nb-1 ;
+    nb--;
+    return tab[nb];
 
 }
 
+
 };
+
+
 
 int main()
 {
