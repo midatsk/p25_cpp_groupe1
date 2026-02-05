@@ -3,6 +3,8 @@
 class Buffer
 {
     friend class Matrix;
+private:
+    
     int size = 0;
     double *t;
     int cpt = 1;
