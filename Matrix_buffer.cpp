@@ -126,14 +126,26 @@ public:
 
 int main()
 {
-    Matrix a(2, 2);
-    a.set(0, 0, 1.0);
 
-    Matrix b(2, 2, 1.0);
+    Matrix m1(4, 3);
+    m1.set(0, 0, 17.2);
+    m1.print();
 
-    Matrix s = (a+b)*2;
+    {
+        Matrix m2 = m1.reshape(2, 6);
+        m2.set(1, 1, 2025);
+        m2.print();
+        m1.print();
+    }
+    Matrix m3 = m1.reshape(6, 2);
+    m3.set(0, 0, 2026);
 
-    s.print();
+    Matrix m4(2, 4);
+    Matrix m5(m4);
+
+    Matrix m6(4, 6);
+    Matrix m7(2, 3);
+    m6 = m7;
 
     return 0;
 }
