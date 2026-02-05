@@ -143,7 +143,11 @@ struct Node
      {
      }
 
-     
+     ~Node()
+     {
+          delete left;
+          delete right;
+     }
 };
 
 struct BinaryTree
@@ -180,7 +184,7 @@ struct BinaryTree
      }
 
      //Je code une fonction traversée autre que depth(Order o) proposée, ne connaissant pas préfixe, infixe, postfixe...
-     void traversee(Node * node)
+     void depth(Node * node)
      {
           //Si on tombe sur un noeud "nul", alors on arrête la traversée
           if (node == nullptr)
@@ -189,16 +193,16 @@ struct BinaryTree
           }
           else
           {
-               traversee(node -> left);
+               depth(node -> left);
                std::cout << node->value << ""<< std::endl;
-               traversee(node->right);
+               depth(node->right);
           }
      }
 
      //Je définis la méthode traversée pour l'arbre binaire : 
-     void traversee_binary_tree()
+     void depth_binary_tree()
      {
-          traversee(root);
+          depth(root);
      }
 
      void print(Node * node, int i) 
@@ -224,6 +228,11 @@ struct BinaryTree
      {
           print(root, 0);
      }
+
+     ~BinaryTree()
+     {
+          delete root;
+     };
 };
 
 int main()
