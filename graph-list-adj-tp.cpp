@@ -5,7 +5,6 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
-
 class Edge
 {
     friend class Graph;
@@ -40,6 +39,8 @@ public:
 
 class Graph
 {
+
+    std::unordered_map<std::string, int> name_to_index; // Dictionnaire pour garder la correspondance entre le nom et l'indice du sommet
     public:
     std::vector<Vertex *> vertices; // vecteur des sommets du graphe
 
@@ -71,8 +72,8 @@ class Graph
         }
         else
         {
-
             vertices.push_back(new Vertex(name, index));
+            name_to_index[name] = index ; // Mise à jour du dictionnaire
             std::cout << "Sommet " << name <<" ajouté avec succès"<< std::endl;
         }
     }
@@ -87,6 +88,15 @@ class Graph
             }
         }
         return nullptr;
+    }
+
+    Vertex* getVertex_by_name(const std::string& name)
+    {
+    auto it = name_to_index.find(name);
+    if (it == name_to_index.end())
+        return nullptr;
+
+    return getVertex_by_ind(it->second);
     }
 
     bool edge_in_graph(int id1, int id2) // vérifie si l'arête existe déjà ou non
@@ -120,7 +130,7 @@ class Graph
         return false;
     }
 
-    void addEdge(int id1, int id2, double w) // crée un sommet orienté id1 -> id2
+    void add_edge(int id1, int id2, double w) // crée un sommet orienté id1 -> id2
     {
         bool check1 = vertex_in_graph(id1);
         bool check2 = vertex_in_graph(id2);
@@ -148,19 +158,34 @@ class Graph
     }
 
 public:
-    void add_edge(const std::string &begin, const std::string &end, double value) {}
+    void add_edge(const std::string &begin, const std::string &end, double value)
+    {
+        auto it1 = name_to_index.find(begin);
+        auto it2 = name_to_index.find(end);
+
+    if (it1 == name_to_index.end() || it2 == name_to_index.end())
+    {
+        std::cout << "Un des sommets n'existe pas"<< std::endl;
+        return;
+    }
+
+    add_edge(it1->second, it2->second, value);
+    }
+    
     void dfs() {}
+
+
 };
 
 int main()
 {
 
     Graph g;
-    g.addEdge(0, 1, 500);
-    g.addVertex("Truc",0);
+    g.add_edge(0, 1, 500);
+    g.addVertex("Truc", 0);
     g.addVertex("Muche", 1);
-    g.addEdge(0, 1, 500);
-    g.addEdge(0, 1, 500);
+    g.add_edge("Truc", "Muche", 500);
+    g.add_edge("Truc", "Muche", 500);
 
     return 0;
 }
