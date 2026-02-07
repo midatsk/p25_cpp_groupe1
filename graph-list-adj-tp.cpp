@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+
 class Edge
 {
     friend class Graph;
@@ -172,7 +173,43 @@ public:
     add_edge(it1->second, it2->second, value);
     }
     
-    void dfs() {}
+    void dfs_rec(Vertex* vertex, std::set<int>&visited)
+    {
+        // Cas de base : si vertex est le pointeur null ou s'il a déjà été visité
+        if (vertex == nullptr || visited.count(vertex->index))
+        {
+            return ; 
+        }
+        else
+        {
+            // On marque le sommet comme visité
+            visited.insert(vertex->index);
+            std::cout << vertex-> name << " ";
+            
+            // On lance le parcours récursif de ses voisins
+            for (int i = 0; i < vertex->edges.size(); ++i)
+        {   
+            Edge* e = vertex->edges[i];
+            Vertex* next = getVertex_by_ind(e->dest_index);
+            dfs_rec(next, visited);
+        }
+
+
+        }
+    }
+
+    void dfs()
+    {
+        std::set<int> visited; // set pour stocker les indices des sommets déjà visités
+
+        for (int i = 0; i < vertices.size(); i++)
+        {
+            if (visited.count(vertices[i]->index) == 0)
+            {
+                dfs_rec(vertices[i], visited);
+            }
+        }
+    }
 
 
 };
@@ -186,6 +223,8 @@ int main()
     g.addVertex("Muche", 1);
     g.add_edge("Truc", "Muche", 500);
     g.add_edge("Truc", "Muche", 500);
+
+    g.dfs();
 
     return 0;
 }
