@@ -1,79 +1,166 @@
+#include <string>
 #include <iostream>
+#include <fstream>
+#include <stdexcept>
 #include <vector>
+#include <unordered_map>
+#include <set>
 
-
-struct Vertex
+class Edge
 {
+    friend class Graph;
+    double weight;  // poids de l'arête
+    int src_index;  // indice du sommet de départ
+    int dest_index; // indice du sommet d'arrivée
 
-    int indice;
-    std::vector<Edge *> e;
-    Vertex(int ind) : indice(ind)
-    {
-        for (int i = 0; i < e.size(); i++)
-        {
-            e[i] = new Edge;
-        }
-    }
+    Edge() {} // constructeur par défaut
+
+    Edge(int weight, int src_index, int dest_index) : weight(weight), src_index(src_index), dest_index(dest_index) {} // constructeur avec arguments
+};
+class Vertex
+{
+    friend class Graph;
+    std::string name;          // nom du sommet
+    int index;                 // indice du sommet
+    std::vector<Edge *> edges; // vecteur des arêtes dont il est le départ
+
+    Vertex() : name(""), index(0) {} // constructeur par défaut
 
     ~Vertex()
     {
-        for (int i = 0; i < e.size(); i++)
+        for (int i = 0; i < edges.size(); i++)
         {
-            delete e[i];
-        }
-    }
-};
-
-struct Edge
-{
-    double poids;
-    Vertex *begin;
-    Vertex *end;
-
-    void print()
-    {
-        std::cout << begin->indice << "-" << (poids) << "->" << end->indice << std::endl;
-    }
-};
-inline Vertex::Vertex(int ind) : indice(ind)
-    {
-        for (int i = 0; i < e.size(); i++)
-        {
-            e[i] = new Edge;
+            delete edges[i];
         }
     }
 
-struct Graph
+public:
+    Vertex(std::string name, int index) : name(name), index(index) {} // constructeur avec arguments
+};
+
+class Graph
 {
-    std::vector<Vertex *> v;
-    
+    public:
+    std::vector<Vertex *> vertices; // vecteur des sommets du graphe
+
     ~Graph()
     {
-        for (int i = 0; i < v.size(); i++)
+        for (int i = 0; i < vertices.size(); i++)
         {
-            delete v[i];
+            delete vertices[i];
         }
     }
-    // Ajoute le sommet d'indice n
-    void addVertex(int n)
+
+    bool vertex_in_graph(int v_index)
     {
-        for (int i=v.size(); i<=n; i++)
+        for (int i = 0; i < vertices.size(); i++)
         {
-            Vertex* new_vertex = new Vertex(i);
-            v.push_back(new_vertex);
-            new_vertex->indice = i;
+            if (vertices[i]->index == v_index)
+            {
+                return true;
+            }
         }
-         
+        return false;
     }
-    void addEdge(int i, int j, double weight)
+
+    void addVertex(const std::string &name, int index)
     {
-        addVertex(i);
-        addVertex(j);
-        Edge* edge = new Edge;
-        edge->poids = weight;
-        edge->begin = v[i] ;
-        edge->end = v[j];
-        (v[i]->e).push_back(edge);
-        (v[j]->e).push_back(edge);
+        if (vertex_in_graph(index) == true)
+        {
+            std::cout << "Le sommet " << name << " existe déjà" << std::endl;
+        }
+        else
+        {
+
+            vertices.push_back(new Vertex(name, index));
+            std::cout << "Sommet " << name <<" ajouté avec succès"<< std::endl;
+        }
     }
+
+    Vertex *getVertex_by_ind(int id)
+    {
+        for (int i = 0; i < vertices.size(); i++)
+        {
+            if (vertices[i]->index == id)
+            {
+                return vertices[i];
+            }
+        }
+        return nullptr;
+    }
+
+    bool edge_in_graph(int id1, int id2) // vérifie si l'arête existe déjà ou non
+    {
+        Vertex *v1 = getVertex_by_ind(id1);  
+        std::vector<Edge*> edges1 = v1->edges; 
+        Vertex *v2 = getVertex_by_ind(id2);  
+        std::vector<Edge*> edges2 = v2->edges; 
+
+        if (v1 == nullptr || v2 == nullptr) // Si un des deux sommets n'existe pas
+        {
+            return false;
+        }
+
+        for (int i = 0; i < edges1.size(); i++) // test d'existence pour une arête orientée id1 -> id2
+        {
+            if (edges1[i]->dest_index == id2)
+            {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < edges2.size(); i++) // test d'existence pour une arête orientée id2 -> id1
+        {
+            if (edges2[i]->dest_index == id1)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void addEdge(int id1, int id2, double w) // crée un sommet orienté id1 -> id2
+    {
+        bool check1 = vertex_in_graph(id1);
+        bool check2 = vertex_in_graph(id2);
+
+        Vertex* v1 = getVertex_by_ind(id1);
+
+        if ((check1 && check2) == true)
+        {
+            bool check3 = edge_in_graph(id1, id2);
+            if (check3 == true)
+            {
+                std::cout << "L'arête existe déjà" << std::endl;
+            }
+            else
+            {
+                
+                v1->edges.push_back(new Edge(w, id1, id2));
+                std::cout << "Arête ajoutée avec succès" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "Un des sommets n'existe pas" << std::endl;
+        }
+    }
+
+public:
+    void add_edge(const std::string &begin, const std::string &end, double value) {}
+    void dfs() {}
 };
+
+int main()
+{
+
+    Graph g;
+    g.addEdge(0, 1, 500);
+    g.addVertex("Truc",0);
+    g.addVertex("Muche", 1);
+    g.addEdge(0, 1, 500);
+    g.addEdge(0, 1, 500);
+
+    return 0;
+}
