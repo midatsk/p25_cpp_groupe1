@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include "Matrix_buffer_2.h"
 
 class Edge
 {
@@ -70,6 +71,7 @@ class Graph
         if (vertex_in_graph(index) == true)
         {
             std::cout << "Le sommet " << name << " existe déjà" << std::endl;
+             
         }
         else
         {
@@ -158,6 +160,22 @@ class Graph
         }
     }
 
+    int get_or_create_vertex(const std::string& name) // Fonction auxiliaire pour la fonction read_triplet
+{
+    // On recherche dans le dictionnaire du graph l'indice correspondant au nom name
+    auto it = name_to_index.find(name);
+    // Si l'objet existe déjà, alors on renvoie l'indice qui lui est déjà attribué
+    if (it != name_to_index.end())
+    {
+        return it->second;
+    }
+    // Sinon, on crée le sommet et il aura l'indice de la taille du 
+    int new_index = vertices.size();
+    addVertex(name, new_index);
+    return new_index;
+}
+
+
 public:
     void add_edge(const std::string &begin, const std::string &end, double value)
     {
@@ -176,7 +194,7 @@ public:
     void dfs_rec(Vertex* vertex, std::set<int>&visited)
     {
         // Cas de base : si vertex est le pointeur null ou s'il a déjà été visité
-        if (vertex == nullptr || visited.count(vertex->index))
+        if (vertex == nullptr || visited.count(vertex->index)==1)
         {
             return ; 
         }
@@ -211,20 +229,72 @@ public:
         }
     }
 
+    Matrix adj_mat()
+    {
+        int n = vertices.size();
+        Matrix M = Matrix(n,n); // La matrice est initialisée avec des infinity
+        for (Vertex * v : vertices)
+        {
+            int i = v->index;
+            for (Edge* e : v->edges)
+            {
+                int j = e->dest_index;
+                M.set(i,j,e->weight);
+            }
+        }
+        return M ; 
+    }
+
 
 };
+
+Graph read_triplet(const std::string &filename)
+{
+    Graph g;
+    std::cout << "read_triplet(" << filename << ")" << std::endl;
+
+    
+    std::ifstream file(filename);
+
+    if (not file.is_open())
+    {
+        throw std::runtime_error(std::string("file ") + filename + std::string(" not found"));
+    }
+
+    std::string from, to;
+    double value;
+
+    while (file >> from >> to >> value) 
+    {
+        std::cout << from << " " << to << " " << value << std::endl;
+        // Il faut pouvoir construire le graphe, c'est-à-dire créer d'abord les sommets, 
+        // sans créer de doublons lorsque plusieurs arêtes partant d'un sommet sont créées
+        // La fonction addVertex a besoin non seulement de la string du sommet, mais aussi de connaître son indice
+        // Pour ne pas gérer des indices dans la fonction read_triplet, on crée une fonction auxiliaire dans la classe Graph 
+        // qui permet de régler le problème de l'index à chercher pour les sommets
+        
+        
+        int from_id = g.get_or_create_vertex(from);
+        int to_id   = g.get_or_create_vertex(to);
+
+        g.add_edge(from_id, to_id, value);
+
+    }
+    std::cout << std::endl;
+
+    file.close(); // on ferme le fichier
+
+    return g;
+}
 
 int main()
 {
 
-    Graph g;
-    g.add_edge(0, 1, 500);
-    g.addVertex("Truc", 0);
-    g.addVertex("Muche", 1);
-    g.add_edge("Truc", "Muche", 500);
-    g.add_edge("Truc", "Muche", 500);
+    Graph g = read_triplet("graph0.gr");
 
     g.dfs();
+
+    g.adj_mat().print();
 
     return 0;
 }
