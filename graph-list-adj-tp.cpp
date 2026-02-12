@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include <algorithm>
 #include "Matrix_buffer_2.h"
 
 class Edge
@@ -243,6 +244,24 @@ public:
             }
         }
         return M ; 
+    }
+
+    Matrix floyd_warshall()
+    {
+        int n = vertices.size();
+        Matrix A = adj_mat();
+        for (int k=0; k<n; k++)
+        {
+            for (int i=0; i<n; i++)
+            {
+                for (int j=0; j<n; j++)
+                {
+                    double min = std::min(A.get(i,j),A.get(i,k) + A.get(k,j));
+                    A.set(i,j, min);
+                }
+            }
+        }
+        return A; 
     }
 
 
